@@ -21,12 +21,11 @@ public class FruitScript : MonoBehaviour
     public AudioSource audio2;
     public AudioSource audioget;
     public int score;
-    GameObject genScore;
 
     public bool isCut = false;
 
 
-     
+
     public void UpdateFruitData(FruitData fruitData)
     {
         float fruitsize = fruitData.fruitsize;
@@ -65,7 +64,7 @@ public class FruitScript : MonoBehaviour
 
     public void ScoreManage(int no, bool isPlus, Vector3 pos)
     {
-        genScore = Instantiate(FruitGameManager.Instance.scoreGen, FruitGameManager.Instance.scoreGenParent.transform);//, Quaternion.identity);
+        GameObject genScore = Instantiate(FruitGameManager.Instance.scoreGen, FruitGameManager.Instance.scoreGenParent.transform);//, Quaternion.identity);
         genScore.transform.position = pos;
         if (isPlus)
         {

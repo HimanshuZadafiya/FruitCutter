@@ -45,16 +45,6 @@ public class DataManager : MonoBehaviour
         return PlayerPrefs.GetInt("VibrationValue", 0);
     }
 
-    public void SetBestScore(int no)
-    {
-        PlayerPrefs.SetInt("BestScore", no);
-    }
-
-    public int GetBestScore()
-    {
-        return PlayerPrefs.GetInt("BestScore", 0);
-    }
-
 
 
 

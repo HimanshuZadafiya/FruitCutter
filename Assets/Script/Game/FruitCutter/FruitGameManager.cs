@@ -43,6 +43,9 @@ public class FruitGameManager : MonoBehaviour
     [Header("--- Current Difficulty ---")]
     public FruitDifficulty currentDifficulty;
 
+
+    public List<GameObject> scoreObjList;
+
     private void Awake()
     {
         if (Instance == null)
@@ -100,6 +103,10 @@ public class FruitGameManager : MonoBehaviour
 
     public void StartGame()
     {
+        playerScore = 0;
+        milestoneStep = 50;
+        nextMilestone = 50;
+        playerScoreTxt1.text =playerScore.ToString();
         difficultyPanel.SetActive(true);
         playerScoreBox.gameObject.SetActive(false);
     }
@@ -199,13 +206,8 @@ public class FruitGameManager : MonoBehaviour
     public void StartSpawning()
     {
         InvokeRepeating(nameof(SpawnFruitGroup), currentDifficulty.minFruitSpawnTime, currentDifficulty.maxFruitSpawnTime);
-
-        // Bomb spawn chance in %
-
-
         if (Random.Range(0f, 100f) < currentDifficulty.bombSpawnChance)
         {
-            Debug.Log("Bomb spawn ");
             InvokeRepeating(nameof(SpawnBombGroup), currentDifficulty.minBombSpawnTime, currentDifficulty.maxBombSpawnTime);
         }
     }
@@ -220,14 +222,13 @@ public class FruitGameManager : MonoBehaviour
         for (int i = 0; i < totalFruitSpawn; i++)
         {
             SpawnOneBomb();
-            // small random gap between items in the burst so they don't all overlap
             yield return new WaitForSeconds(Random.Range(0.05f, 0.25f));
         }
     }
     public void SpawnOneBomb()
     {
-        float rendX = Random.Range(2, -2);                     // e.g. -MaxX .. MaxX
-        float rendY = Random.Range(-6.44f, -5f);                     // spawn Y in your desired range
+        float rendX = Random.Range(2, -2);
+        float rendY = Random.Range(-6.44f, -5f);
         Vector3 pos = new Vector3(rendX, rendY, 0f);
 
         Rigidbody2D b = Instantiate(bombPrefab, pos, Quaternion.identity).GetComponent<Rigidbody2D>();
@@ -254,21 +255,19 @@ public class FruitGameManager : MonoBehaviour
 
     IEnumerator SpawnFruits()
     {
-        int totalFruitSpawn = Random.Range(currentDifficulty.minFruitSpawnCnt, currentDifficulty.maxFruitSpawnCnt);          // 2..5
+        int totalFruitSpawn = Random.Range(currentDifficulty.minFruitSpawnCnt, currentDifficulty.maxFruitSpawnCnt);          
 
         for (int i = 0; i < totalFruitSpawn; i++)
         {
             SpawnOneFruit();
-            // small random gap between items in the burst so they don't all overlap
             yield return new WaitForSeconds(Random.Range(0.05f, 0.25f));
         }
     }
 
     void SpawnOneFruit()
     {
-        // pick random X correctly (min then max)
-        float rendX = Random.Range(2, -2);                     // e.g. -MaxX .. MaxX
-        float rendY = Random.Range(-6.44f, -5f);                     // spawn Y in your desired range
+        float rendX = Random.Range(2, -2);                     
+        float rendY = Random.Range(-6.44f, -5f);                     
         Vector3 pos = new Vector3(rendX, rendY, 0f);
 
         if (fruitList == null || fruitList.Count == 0)
@@ -280,7 +279,7 @@ public class FruitGameManager : MonoBehaviour
         int randomIndex = Random.Range(0, fruitList.Count);
         FruitData fruitData = fruitList[randomIndex];
 
-        GameObject go = Instantiate(fruitPrefab, pos, Quaternion.identity, transform); // parent to spawner (optional)
+        GameObject go = Instantiate(fruitPrefab, pos, Quaternion.identity, transform); 
         FruitScript creator = go.GetComponent<FruitScript>();
         if (creator == null)
         {
@@ -290,7 +289,6 @@ public class FruitGameManager : MonoBehaviour
 
         creator.UpdateFruitData(fruitData);
 
-        // ensure the rigidbody is reset (important if you later use pooling)
         Rigidbody2D rb = creator.fruiteRB != null ? creator.fruiteRB : go.GetComponent<Rigidbody2D>();
         if (rb == null)
         {
@@ -301,9 +299,8 @@ public class FruitGameManager : MonoBehaviour
         rb.linearVelocity = Vector2.zero;
         rb.angularVelocity = 0f;
 
-        // randomized upward and small horizontal impulse + torque
-        float upForce = Random.Range(10f, 15f);                     // your previous values; tune as needed
-        float horizForce = Random.Range(-1.5f, 1.5f);               // small left/right variance
+        float upForce = Random.Range(10f, 15f);                     
+        float horizForce = Random.Range(-1.5f, 1.5f);               
         rb.AddForce(new Vector2(horizForce, upForce), ForceMode2D.Impulse);
 
         float torque = Random.Range(-50f, 50f);
@@ -320,16 +317,11 @@ public class FruitGameManager : MonoBehaviour
         CancelInvoke(nameof(SpawnFruitGroup));
         StopCoroutine(SpawnFruits());
 
-
         CancelInvoke(nameof(SpawnBombGroup));
         StopCoroutine(SpwanBomb());
 
-        if (playerScore > DataManager.Instance.GetBestScore())
-        {
-            DataManager.Instance.SetBestScore(playerScore);
-        }
 
-        StartGame();
+        Invoke(nameof(StartGame), 2f);
     }
     #endregion
 }
