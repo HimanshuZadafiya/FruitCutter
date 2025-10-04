@@ -8,6 +8,9 @@ TagManager:
   - FxTemporaire
   - Destroy
   - Fruit
+  - Ticket
+  - Began_DKC
+  - Destroyer
   layers:
   - Default
   - TransparentFX

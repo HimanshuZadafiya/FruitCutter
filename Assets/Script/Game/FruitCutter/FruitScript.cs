@@ -26,11 +26,7 @@ public class FruitScript : MonoBehaviour
     public bool isCut = false;
 
 
-    void Start()
-    {
-        Debug.Log("--- Start ---");
-    }
-
+     
     public void UpdateFruitData(FruitData fruitData)
     {
         float fruitsize = fruitData.fruitsize;

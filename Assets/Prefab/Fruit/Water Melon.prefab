@@ -5169,14 +5169,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6dd987ee607aa9342bcb7c5ab426f53b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fruiteObj: {fileID: 765516558694612960}
+  fruitImg: {fileID: 8287031650762413598}
+  fruitCut1: {fileID: 5671786676595525}
+  fruitCut2: {fileID: 5348214242967368129}
+  fruitParticalSystem: {fileID: 10165739435209063}
+  fruiteObj: {fileID: 2489435155458489713}
   fruiteRB: {fileID: 741118144836015285}
-  cut1: {fileID: 168057739714474705}
-  cut2: {fileID: 5222885204241973827}
+  cut1RB: {fileID: 168057739714474705}
+  cut2RB: {fileID: 5222885204241973827}
+  collider: {fileID: -5037795066559756578}
   cut: {fileID: 8300000, guid: 9fe68bf2b752efc41be97d056cf81d49, type: 3}
   audio2: {fileID: 2570769497547402581}
   audioget: {fileID: 2570769497547402581}
   score: 5
+  isCut: 0
 --- !u!82 &2570769497547402581
 AudioSource:
   m_ObjectHideFlags: 0

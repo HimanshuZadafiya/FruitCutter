@@ -173,7 +173,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      extra_boosters_light_effect_03_0: -678062279211950572
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

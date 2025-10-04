@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Android.Gradle.Manifest;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,25 +8,29 @@ public class FruitGameManager : MonoBehaviour
 {
     public static FruitGameManager Instance;
 
+
+    [Header("--- UI Elements ---")]
     public Text playerScoreTxt1;
     public Text timerTxt;
+    public GameObject playerScoreBox;
+
+    public GameObject scoreGen;
+    public GameObject scoreGenParent;
+    public GameObject bladeObj;
+    public GameObject difficultyPanel;
 
     public float secondsCount;
     int flag = 0;
 
-    public GameObject scoreGen;
-    public GameObject scoreGenParent;
-
     public int playerScore;
-    public int milestoneStep = 50;        // every N points
-    public int nextMilestone = 50;       // next checkpoint (initialize in Awake/Start)
-
+    public int milestoneStep = 50;
+    public int nextMilestone = 50;
 
     [Header("--- Fruit Spawaner ----")]
-
     public List<FruitData> fruitList = new List<FruitData>();
     public GameObject fruitPrefab;
-    public GameObject bomb;
+    public GameObject bombPrefab;
+    public GameObject ticketPrefab;
 
     [Header("--- Easy Difficulty ---")]
     public FruitDifficulty easyDifficulty;
@@ -35,9 +40,7 @@ public class FruitGameManager : MonoBehaviour
 
     [Header("--- Hard Difficulty ---")]
     public FruitDifficulty hardDifficulty;
-
     [Header("--- Current Difficulty ---")]
-
     public FruitDifficulty currentDifficulty;
 
     private void Awake()
@@ -51,15 +54,59 @@ public class FruitGameManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-
-        currentDifficulty = easyDifficulty;
-        SoundManager.Instance.StopBackgroundMusic();
-
-        Invoke(nameof(StartSpawning), 1f);
+        StartGame();
     }
     private void Update()
     {
-        Timer();
+        // Timer();
+
+        if (Input.GetMouseButton(0))
+        {
+            if (!bladeObj.activeSelf)
+            {
+                bladeObj.SetActive(true);
+            }
+            Vector2 pos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            bladeObj.transform.position = pos;
+            Blade.Instance.bladeTrailPrefab.transform.position = pos;
+        }
+        else if (Input.GetMouseButtonUp(0))
+        {
+            bladeObj.SetActive(false);
+        }
+    }
+
+    public void SelectDifficulty(int difficulty)
+    {
+        if (difficulty == 0)
+        {
+            currentDifficulty = easyDifficulty;
+        }
+        else if (difficulty == 1)
+        {
+            currentDifficulty = mediumDifficulty;
+        }
+        else if (difficulty == 2)
+        {
+            currentDifficulty = hardDifficulty;
+        }
+        difficultyPanel.SetActive(false);
+        playerScoreBox.gameObject.SetActive(true);
+
+
+        SoundManager.Instance.StopBackgroundMusic();
+        Invoke(nameof(StartSpawning), 1f);
+    }
+
+    public void StartGame()
+    {
+        difficultyPanel.SetActive(true);
+        playerScoreBox.gameObject.SetActive(false);
+    }
+
+    public void PlayButtonClick()
+    {
+        difficultyPanel.SetActive(true);
     }
 
     void Timer()
@@ -104,19 +151,17 @@ public class FruitGameManager : MonoBehaviour
         Debug.Log("--- User Win ---");
     }
 
-
     public void CurrentScoreManage(int score)
     {
         Debug.Log("CurrentScoreManage::::" + score);
         playerScore += score;
-
+        playerScoreTxt1.text = playerScore.ToString();
         if (playerScore >= nextMilestone)
         {
             OnReachMilestone();
             nextMilestone += milestoneStep;
         }
     }
-
 
     private void OnReachMilestone()
     {
@@ -171,7 +216,6 @@ public class FruitGameManager : MonoBehaviour
     }
     IEnumerator SpwanBomb()
     {
-
         int totalFruitSpawn = Random.Range(currentDifficulty.minBombSpawnCnt, currentDifficulty.maxBombSpawnCnt);
         for (int i = 0; i < totalFruitSpawn; i++)
         {
@@ -186,9 +230,20 @@ public class FruitGameManager : MonoBehaviour
         float rendY = Random.Range(-6.44f, -5f);                     // spawn Y in your desired range
         Vector3 pos = new Vector3(rendX, rendY, 0f);
 
-        Rigidbody2D b = Instantiate(bomb, pos, Quaternion.identity).GetComponent<Rigidbody2D>();
+        Rigidbody2D b = Instantiate(bombPrefab, pos, Quaternion.identity).GetComponent<Rigidbody2D>();
         b.AddForce(new Vector2(0, 15f), ForceMode2D.Impulse);
         b.AddTorque(Random.Range(50f, -50f));
+
+        if (Random.Range(0f, 100f) < currentDifficulty.ticketSpawnChance)
+        {
+            rendX += 0.5f;
+            rendY += 0.5f;
+
+            Vector3 ticketPos = new Vector3(rendX, rendY, 0f);
+            Rigidbody2D rb = Instantiate(ticketPrefab, ticketPos, Quaternion.identity).GetComponent<Rigidbody2D>();
+            rb.AddForce(new Vector2(0, 13f), ForceMode2D.Impulse);
+            rb.AddTorque(Random.Range(50f, -50f));
+        }
     }
 
 
@@ -200,7 +255,6 @@ public class FruitGameManager : MonoBehaviour
     IEnumerator SpawnFruits()
     {
         int totalFruitSpawn = Random.Range(currentDifficulty.minFruitSpawnCnt, currentDifficulty.maxFruitSpawnCnt);          // 2..5
-        Debug.Log("totalFruitSpawn:::" + totalFruitSpawn);
 
         for (int i = 0; i < totalFruitSpawn; i++)
         {
@@ -260,8 +314,22 @@ public class FruitGameManager : MonoBehaviour
 
     public void StopSpawning()
     {
+
+        Debug.Log("--- Game Over ---");
+
         CancelInvoke(nameof(SpawnFruitGroup));
-        StopCoroutine(nameof(SpawnFruits));
+        StopCoroutine(SpawnFruits());
+
+
+        CancelInvoke(nameof(SpawnBombGroup));
+        StopCoroutine(SpwanBomb());
+
+        if (playerScore > DataManager.Instance.GetBestScore())
+        {
+            DataManager.Instance.SetBestScore(playerScore);
+        }
+
+        StartGame();
     }
     #endregion
 }
@@ -284,7 +352,6 @@ public class FruitData
 public class FruitDifficulty
 {
     [Header("--- Total Item Spawn ---")]
-
     public int minFruitSpawnCnt;
     public int maxFruitSpawnCnt;
 
@@ -301,4 +368,7 @@ public class FruitDifficulty
     public float bombSpawnChance;
 
 
+    [Header("---  Ticket Spawn Chance (1 - 100) %  ---")]
+    public float ticketSpawnChance;
 }
+

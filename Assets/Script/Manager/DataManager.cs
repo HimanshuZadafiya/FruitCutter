@@ -9,7 +9,7 @@ using UnityEngine.SceneManagement;
 public class DataManager : MonoBehaviour
 {
     public static DataManager Instance;
-   
+
 
     private void Awake()
     {
@@ -23,10 +23,10 @@ public class DataManager : MonoBehaviour
             DestroyImmediate(this.gameObject);
         }
 
-     
+
     }
 
- public void SetSound(int no)
+    public void SetSound(int no)
     {
         PlayerPrefs.SetInt("SoundValue", no);
 
@@ -45,7 +45,18 @@ public class DataManager : MonoBehaviour
         return PlayerPrefs.GetInt("VibrationValue", 0);
     }
 
+    public void SetBestScore(int no)
+    {
+        PlayerPrefs.SetInt("BestScore", no);
+    }
 
-   
+    public int GetBestScore()
+    {
+        return PlayerPrefs.GetInt("BestScore", 0);
+    }
+
+
+
+
 
 }
